@@ -1,36 +1,3 @@
-
-let N = 1000  //人工
-let beta = 0.1 / N;//感染率
-let gammma = 0.05; //回復率
-let duration = 1000;
-
-function run() {
-  // オイラー法
-  let data = { labels: [], S: [], I: [], R: [] };
-
-  let S = N; // 未感染者(Susceptibles)
-  let I = 1; // 感染者(Infectious)
-  let R = 0; // 回復者(Removed)
-
-  data.S.push(S);
-  data.I.push(I);
-  data.R.push(R);
-
-  for (let t = 0; t < duration; t++) {
-    S = S - beta * S * I;
-    I = I + beta * S * I - gammma * I;
-    R = Math.abs(N - (S + I));
-
-    const R0 = N * beta / gammma; //基本再生産数
-    data.labels.push(t);
-    data.S.push(S);
-    data.I.push(I);
-    data.R.push(R);
-  }
-  console.log(data);
-  return data;
-}
-
 let chart;
 
 function drawChart() {
@@ -59,6 +26,13 @@ function drawChart() {
         borderColor: 'rgb(0, 0, 255)',
         backgroundColor: 'rgb(255, 255, 255)',
         fill: false
+      },
+      {
+        label: 'N',
+        data: sampleData.N,
+        borderColor: 'rgb(0, 0, 0)',
+        backgroundColor: 'rgb(255, 255, 255)',
+        fill: false
       }]
     },  //表示するデータ
     options: {
@@ -73,12 +47,12 @@ function drawChart() {
           radius: 0
         }
       },
-      scales: {                          // 軸設定
+      scales: {                            // 軸設定
         xAxes: [{
-          scaleLabel: {                 // 軸ラベル
-            display: true,                // 表示設定
-            labelString: '時間[t]',    // ラベル
-            fontColor: "black",             // 文字の色
+          scaleLabel: {                   // 軸ラベル
+            display: true,                 // 表示設定
+            labelString: '時間[t]',        // ラベル
+            fontColor: "black",           // 文字の色
             fontSize: 16                  // フォントサイズ
           },
           ticks: {
@@ -107,34 +81,3 @@ function drawChart() {
     }
   });
 }
-
-function update() {
-  if (chart) {
-    chart.destroy();
-  }
-  drawChart();
-}
-drawChart();
-
-$('#beta-val').text("beta=" + (beta * N).toFixed(2));
-$('#gamma-val').text("gamma=" + gammma.toFixed(2));
-$('#duration-val').text("duration=" + duration.toFixed(2));
-
-
-$('#beta').on('input', () => {
-  beta = $('#beta').val() / N;
-  $('#beta-val').text("beta=" + (beta * N).toFixed(2));
-  update();
-});
-
-$('#gamma').on('input', () => {
-  gammma = Number($('#gamma').val());
-  $('#gamma-val').text("gamma=" + gammma.toFixed(2));
-  update();
-});
-
-$('#duration').on('input', () => {
-  duration = Number($('#duration').val());
-  $('#duration-val').text("duration=" + duration.toFixed(2));
-  update();
-});
