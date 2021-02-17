@@ -15,12 +15,20 @@ function run() {
   data.S.push(S);
   data.I.push(I);
   data.R.push(R);
-
+  //alert(gammma / beta);
+  let isTop = false;
+  let dS_temp;
   for (let t = 0; t < duration; t++) {
-    S = S - beta * S * I;
-    I = I + beta * S * I - gammma * I;
+    const dS = - beta * S * I;
+    const dI = beta * S * I - gammma * I;
+    S += dS;
+    I += dI;
+    if (data.I[t] < data.I[t - 1] && !isTop) {
+      data.top = S;
+      data.realTop = gammma / beta;
+      isTop = true;
+    }
     R = Math.abs(N - (S + I));
-
     const R0 = N * beta / gammma; //基本再生産数
     data.labels.push(t);
     data.S.push(S);
@@ -35,6 +43,7 @@ let chart;
 
 function drawChart() {
   const sampleData = run();
+  $('#output').text((sampleData.top).toFixed(2) + "/" + (sampleData.realTop).toFixed(2));
   var canvas = document.getElementById('stage');// グラフ化するデータ系列のサンプル
   chart = new Chart(canvas, {
     type: 'line',  //グラフの種類
