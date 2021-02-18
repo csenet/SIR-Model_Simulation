@@ -1,8 +1,9 @@
 
 let N = 1000  //人工
-let beta = 0.1 / N;//感染率
-let gammma = 0.05; //回復率
-let duration = 1000;
+let beta = 0.2 / N;//感染率
+let gamma = 0.07; //回復率
+let duration = 100;
+
 
 function run() {
   // オイラー法
@@ -15,25 +16,73 @@ function run() {
   data.S.push(S);
   data.I.push(I);
   data.R.push(R);
-  //alert(gammma / beta);
+
   let isTop = false;
-  let dS_temp;
+
   for (let t = 0; t < duration; t++) {
     const dS = - beta * S * I;
-    const dI = beta * S * I - gammma * I;
+    const dI = beta * S * I - gamma * I;
     S += dS;
     I += dI;
     if (data.I[t] < data.I[t - 1] && !isTop) {
       data.top = S;
-      data.realTop = gammma / beta;
+      data.realTop = gamma / beta;
       isTop = true;
     }
     R = Math.abs(N - (S + I));
-    const R0 = N * beta / gammma; //基本再生産数
+    const R0 = N * beta / gamma; //基本再生産数
     data.labels.push(t);
     data.S.push(S);
     data.I.push(I);
     data.R.push(R);
+  }
+  return data;
+}
+
+function run2() {
+  // ルンゲクッタ
+  let data = { labels: [], S: [], I: [], R: [] };
+
+  let S = N; // 未感染者(Susceptibles)
+  let I = 1; // 感染者(Infectious)
+  let R = 0; // 回復者(Removed)
+
+  data.S.push(S);
+  data.I.push(I);
+  data.R.push(R);
+
+  let isTop = false;
+  const dt = 0.5;
+  let t = 0;
+  let index = 1;
+  while (t < duration) {
+    const dS = -beta * S * I;
+    const dI = beta * S * I - gamma * I;
+    const S2 = S + dS * dt;
+    const I2 = I + dS * dt;
+    const dS2 = -beta * S2 * I2;
+    const dI2 = beta * S2 * I2 - gamma * I2;
+    if (t == 0) console.log(beta, gamma, I, S, gamma);
+    S = S + (dS + dS2) * dt / 2;
+    I = I + (dI + dI2) * dt / 2;
+
+    R = Math.abs(N - (S + I));
+
+
+
+    const R0 = N * beta / gamma; //基本再生産数
+
+    data.labels.push(t);
+    data.S.push(S);
+    data.I.push(I);
+    data.R.push(R);
+    t = t + dt;
+    if (data.I[index] < data.I[index - 1] && !isTop) {
+      data.top = S;
+      data.realTop = gamma / beta;
+      isTop = true;
+    }
+    index++;
   }
   console.log(data);
   return data;
@@ -42,7 +91,7 @@ function run() {
 let chart;
 
 function drawChart() {
-  const sampleData = run();
+  const sampleData = run2();
   $('#output').text((sampleData.top).toFixed(2) + "/" + (sampleData.realTop).toFixed(2));
   var canvas = document.getElementById('stage');// グラフ化するデータ系列のサンプル
   chart = new Chart(canvas, {
@@ -126,7 +175,7 @@ function update() {
 drawChart();
 
 $('#beta-val').text("beta=" + (beta * N).toFixed(2));
-$('#gamma-val').text("gamma=" + gammma.toFixed(2));
+$('#gamma-val').text("gamma=" + gamma.toFixed(2));
 $('#duration-val').text("duration=" + duration.toFixed(2));
 
 
@@ -137,8 +186,8 @@ $('#beta').on('input', () => {
 });
 
 $('#gamma').on('input', () => {
-  gammma = Number($('#gamma').val());
-  $('#gamma-val').text("gamma=" + gammma.toFixed(2));
+  gamma = Number($('#gamma').val());
+  $('#gamma-val').text("gamma=" + gamma.toFixed(2));
   update();
 });
 
